@@ -6,9 +6,9 @@
 //Variabels
 String MacAddress;
 int Variable_Box_Id = 0;
-int Temperatuur_Sensor = 0;
-int Grondvochtigheid_Sensor = 0;
-int Ldr_Sensor = 0;
+int Temperatuur_Sensor_Waarde = 0;
+int Grondvochtigheid_Sensor_Waarde = 0;
+int Ldr_Sensor_Waarde = 0;
 
 //PinOut
 int Temperatuur_Pin = 36;
@@ -50,52 +50,56 @@ void loop()
     Serial.println("Nieuwe Variable_Box_Id toegekend");  
     
     //Testen Meting Sensoren
-    Ldr_Sensor = analogRead(Ldr_Pin);
-    Grondvochtigheid_Sensor = analogRead(Grondvochtigeheid_Pin);
-    Temperatuur_Sensor = analogRead(Temperatuur_Pin);
+    Ldr_Sensor_Waarde = analogRead(Ldr_Pin);
+    Grondvochtigheid_Sensor_Waarde = analogRead(Grondvochtigeheid_Pin);
+    Temperatuur_Sensor_Waarde = analogRead(Temperatuur_Pin);
     
     // Als sensor defect is(ERROR)
-    if(Ldr_Sensor == 0){
+    if(Ldr_Sensor_Waarde == 0){
       Serial.println("Error Ldr_Sensor Kapot"); 
     }
     
-    if(Temperatuur_Sensor == 0){
+    if(Temperatuur_Sensor_Waarde == 0){
       Serial.println("Error Temperatuur_Sensor Kapot"); 
     }
     
-    if(Grondvochtigheid_Sensor == 0){
+    if(Grondvochtigheid_Sensor_Waarde == 0){
       Serial.println("Error Grondvochtigheid_Sensor Kapot"); 
     }
   }
 
 //Na opstart connectie met de API
-Ldr_Sensor = analogRead(Ldr_Pin);
-Grondvochtigheid_Sensor = analogRead(Grondvochtigeheid_Pin);
-Temperatuur_Sensor = analogRead(Temperatuur_Pin);
+Ldr_Sensor_Waarde = analogRead(Ldr_Pin);
+Grondvochtigheid_Sensor_Waarde = analogRead(Grondvochtigeheid_Pin);
+Temperatuur_Sensor_Waarde = analogRead(Temperatuur_Pin);
 
 //Foute waarde gemeten (ERROR)
-if(Ldr_Sensor > Max_Ldr_Sensor){
+if(Ldr_Sensor_Waarde > Max_Ldr_Sensor){
   Serial.println("Error Ldr_Sensor Foute waarde"); 
 }
 
-if(Temperatuur_Sensor > Max_Temperatuur_Sensor){
+if(Temperatuur_Sensor_Waarde > Max_Temperatuur_Sensor){
   Serial.println("Error Temperatuur_Sensor Foute waarde"); 
 }
 
-if(Grondvochtigheid_Sensor > Max_Grondvochtigheid_Sensor){
+if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
   Serial.println("Error Grondvochtigheid_Sensor Foute waarde"); 
 }
 
+//Doorsturen van data naar de API
+
+
+
 //Start de Slaap modus
-delay(2000);
+delay(1000);
 Go_To_Sleep();
 
 
   //Debugging
 //  Serial.println("Debugging");
-//  Serial.println(Temperatuur_Sensor);
-//  Serial.println(Grondvochtigheid_Sensor);
-//  Serial.println(Ldr_Sensor);
+//  Serial.println(Temperatuur_Sensor_Waarde);
+//  Serial.println(Grondvochtigheid_Sensor_Waarde);
+//  Serial.println(Ldr_Sensor_Waarde);
 //  Serial.println("End Debugging"); 
 //  delay(1000);
 }
