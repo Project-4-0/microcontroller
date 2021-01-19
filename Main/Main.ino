@@ -7,8 +7,5 @@ void setup()
  
 void loop()
 {
-  sensorValue = analogRead(34); // read analog input pin 0
-  Serial.print(sensorValue, DEC); // prints the value read
-  Serial.print(" \n"); // prints a space between the numbers
-  delay(1000); // wait 100ms for next reading
+
 }
