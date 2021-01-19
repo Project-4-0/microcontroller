@@ -1,6 +1,8 @@
 //Includes
 #include <WiFi.h>
 
+#define TIME_TO_SLEEP 5         // tijd in seconden dat de sleep modus actief is
+
 //Variabels
 String MacAddress;
 int Variable_Box_Id = 0;
@@ -17,6 +19,17 @@ int Ldr_Pin = 34;
 int Max_Temperatuur_Sensor = 4000;
 int Max_Grondvochtigheid_Sensor = 4000;
 int Max_Ldr_Sensor = 4000;
+
+
+//Functie voor de slaap te activeren
+void Go_To_Sleep(){
+  Serial.println("Going to sleep");
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * 1000000);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_13,1);
+  delay(200);
+  esp_light_sleep_start();
+}
 
 
 void setup()
@@ -55,25 +68,27 @@ void loop()
     }
   }
 
-  //Na opstart connectie met de API
-  Ldr_Sensor = analogRead(Ldr_Pin);
-  Grondvochtigheid_Sensor = analogRead(Grondvochtigeheid_Pin);
-  Temperatuur_Sensor = analogRead(Temperatuur_Pin);
+//Na opstart connectie met de API
+Ldr_Sensor = analogRead(Ldr_Pin);
+Grondvochtigheid_Sensor = analogRead(Grondvochtigeheid_Pin);
+Temperatuur_Sensor = analogRead(Temperatuur_Pin);
 
-  //Foute waarde gemeten (ERROR)
-  if(Ldr_Sensor > Max_Ldr_Sensor){
-    Serial.println("Error Ldr_Sensor Foute waarde"); 
-  }
-  
-  if(Temperatuur_Sensor > Max_Temperatuur_Sensor){
-    Serial.println("Error Temperatuur_Sensor Foute waarde"); 
-  }
-  
-  if(Grondvochtigheid_Sensor > Max_Grondvochtigheid_Sensor){
-    Serial.println("Error Grondvochtigheid_Sensor Foute waarde"); 
-  }
-  
-  
+//Foute waarde gemeten (ERROR)
+if(Ldr_Sensor > Max_Ldr_Sensor){
+  Serial.println("Error Ldr_Sensor Foute waarde"); 
+}
+
+if(Temperatuur_Sensor > Max_Temperatuur_Sensor){
+  Serial.println("Error Temperatuur_Sensor Foute waarde"); 
+}
+
+if(Grondvochtigheid_Sensor > Max_Grondvochtigheid_Sensor){
+  Serial.println("Error Grondvochtigheid_Sensor Foute waarde"); 
+}
+
+//Start de Slaap modus
+delay(2000);
+Go_To_Sleep();
 
 
   //Debugging
