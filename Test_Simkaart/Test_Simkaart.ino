@@ -26,6 +26,8 @@ const char simPIN[]   = "1111";
 
 #include <Wire.h>
 #include <TinyGsmClient.h>
+#include <ESP32Ping.h>
+
 
 #ifdef DUMP_AT_COMMANDS
   #include <StreamDebugger.h>
@@ -73,16 +75,26 @@ void setup() {
   if (strlen(simPIN) && modem.getSimStatus() != 3 ) {
     modem.simUnlock(simPIN);
   }
-}
 
-void loop() {
-  SerialMon.print("Connecting to APN: ");
+   SerialMon.print("Connecting to APN: ");
   SerialMon.print(apn);
   if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
     SerialMon.println(" fail");
   }
   else {
-    SerialMon.println(" OK");    
+    SerialMon.println(" OK"); 
+    bool success = Ping.ping("www.google.com", 3);
+ 
+    if(!success){
+      Serial.println("Ping failed");
+      return;
+    }
+ 
+    Serial.println("Ping succesful.");   
   }
+}
+
+void loop() {
+
 
 }
