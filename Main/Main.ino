@@ -34,7 +34,7 @@ void Go_To_Sleep(){
 
 void setup()
 {
-  Serial.begin(9600); // starts the serial port at 9600
+  Serial.begin(115200); // starts the serial port at 9600
   delay(100);
   Serial.print("ESP Board MAC Address:  ");
   Serial.println(WiFi.macAddress());
