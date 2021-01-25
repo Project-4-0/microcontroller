@@ -8,7 +8,7 @@ const char* ssid = "Van Pelt Homehotspot";
 const char* password = "Speedy2169";
 
 //Your Domain name with URL path or IP address with path
-const char* serverName = "https://vito-api-dev.herokuapp.com/sensors";
+const char* serverName = "https://vito-api-dev.herokuapp.com/measurements";
 
 void postDataToServer() {
  
@@ -24,8 +24,9 @@ void postDataToServer() {
     StaticJsonDocument<200> doc;
     // Add values in the document
     //
-    doc["Name"] = "Test Sensor Arduino 3";
-    doc["SensorTypeID"] = 2;
+    doc["BoxID"] = "1";
+    doc["SensorID"] = 1;
+    doc["Value"] = 1;
    
 
      
