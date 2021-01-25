@@ -1,63 +1,71 @@
 
-#include "WiFly.h"
-#include "Credentials.h"
+#include <WiFi.h>
+#include <HTTPClient.h>
 
-Timer t;
-long lastUpdate=0;
+const char* ssid = "Van Pelt Homehotspot";
+const char* password = "Speedy2169";
 
-byte server[] = { 106,187,94,198 }; // artiswrong.com
+//Your Domain name with URL path or IP address with path
+const char* serverName = "https://vito-api-dev.herokuapp.com/sensors";
 
-Client client("artiswrong.com", 80);
+// the following variables are unsigned longs because the time, measured in
+// milliseconds, will quickly become a bigger number than can be stored in an int.
+unsigned long lastTime = 0;
+// Timer set to 10 minutes (600000)
+//unsigned long timerDelay = 600000;
+// Set timer to 5 seconds (5000)
+unsigned long timerDelay = 5000;
 
 void setup() {
- 
   Serial.begin(115200);
 
-  WiFly.begin();
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting");
+  while(WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
  
-  if (!WiFly.join(ssid, passphrase)) {
-    Serial.println("Association failed.");
-    while (1) {
-      // Hang on failure.
-    }
-  } 
-
+  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 }
-
-void post()
-{
-  Serial.println("connecting...");
-  String PostData="sample={\"fittingId\":1,";
-  unsigned char i;
-  for(i=0;i<6;i++)
-  {
-    PostData=PostData+"\"channel-";
-    PostData=String(PostData+i);
-    PostData=PostData+"\":";
-    PostData=String(PostData + String(analogRead(i)));
-    if(i!=5)
-      PostData=PostData+",";
-  }
-    PostData=PostData+"}"; 
-  Serial.println(PostData);
-  if (client.connect()) {
-    Serial.println("connected");
-  client.println("POST /tinyFittings/index.php HTTP/1.1");
-  client.println("Host:  artiswrong.com");
-  client.println("User-Agent: Arduino/1.0");
-  client.println("Connection: close");
-  client.println("Content-Type: application/x-www-form-urlencoded;");
-  client.print("Content-Length: ");
-  client.println(PostData.length());
-  client.println();
-  client.println(PostData);
-  } else {
-    Serial.println("connection failed");
-  }
-}
-
 
 void loop() {
-    post();
-    delay(500);
+//  //Send an HTTP POST request every 10 minutes
+//  if ((millis() - lastTime) > timerDelay) {
+//    //Check WiFi connection status
+//    if(WiFi.status()== WL_CONNECTED){
+//      HTTPClient http;
+//      
+//      // Your Domain name with URL path or IP address with path
+//      http.begin(serverName);
+//
+//      // Specify content-type header
+//      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+//      // Data to send with HTTP POST
+//      String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&value1=24.25&value2=49.54&value3=1005.14";           
+//      // Send HTTP POST request
+//      int httpResponseCode = http.POST(httpRequestData);
+//      
+//      // If you need an HTTP request with a content type: application/json, use the following:
+//      //http.addHeader("Content-Type", "application/json");
+//      //int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":\"24.25\",\"value2\":\"49.54\",\"value3\":\"1005.14\"}");
+//
+//      // If you need an HTTP request with a content type: text/plain
+//      //http.addHeader("Content-Type", "text/plain");
+//      //int httpResponseCode = http.POST("Hello, World!");
+//     
+//      Serial.print("HTTP Response code: ");
+//      Serial.println(httpResponseCode);
+//        
+//      // Free resources
+//      http.end();
+//    }
+//    else {
+//      Serial.println("WiFi Disconnected");
+//    }
+//    lastTime = millis();
+//  }
 }
