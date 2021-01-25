@@ -1,7 +1,7 @@
 //Includes
 #include <WiFi.h>
 
-#define TIME_TO_SLEEP 5         // tijd in seconden dat de sleep modus actief is
+#define TIME_TO_SLEEP 1         // tijd in seconden dat de sleep modus actief is
 
 //Variabels
 String MacAddress;
@@ -96,10 +96,10 @@ Go_To_Sleep();
 
 
   //Debugging
-//  Serial.println("Debugging");
-//  Serial.println(Temperatuur_Sensor_Waarde);
-//  Serial.println(Grondvochtigheid_Sensor_Waarde);
-//  Serial.println(Ldr_Sensor_Waarde);
-//  Serial.println("End Debugging"); 
-//  delay(1000);
+  Serial.println("Debugging");
+  Serial.println(Temperatuur_Sensor_Waarde);
+  Serial.println(Grondvochtigheid_Sensor_Waarde);
+  Serial.println(Ldr_Sensor_Waarde);
+  Serial.println("End Debugging"); 
+  delay(1000);
 }
