@@ -1,7 +1,16 @@
 //Includes
 #include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
 
-#define TIME_TO_SLEEP 1         // tijd in seconden dat de sleep modus actief is
+#define TIME_TO_SLEEP 5         // tijd in seconden dat de sleep modus actief is
+
+//Wifi credentials
+const char* ssid = "Van Pelt Homehotspot";
+const char* password = "Speedy2169";
+
+//Your Domain name with URL path or IP address with path
+const char* serverName = "https://vito-api-dev.herokuapp.com/measurements";
 
 //Variabels
 String MacAddress;
@@ -31,6 +40,33 @@ void Go_To_Sleep(){
   esp_light_sleep_start();
 }
 
+//Functie voor data naar API te sturen
+int postDataToServer(int x,int y) {
+  Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(serverName);  
+    http.addHeader("Content-Type", "application/json");         
+    StaticJsonDocument<200> doc;
+    // Add values in the document
+    doc["BoxID"] = "1";
+    doc["SensorID"] = x;
+    doc["Value"] = y;
+
+    String requestBody;
+    serializeJson(doc, requestBody);
+    int httpResponseCode = http.POST(requestBody);
+    if(httpResponseCode>0){
+      String response = http.getString();                       
+      Serial.println(httpResponseCode);   
+      Serial.println(response);
+    }
+    else {
+      Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
+    }
+  }
+}
 
 void setup()
 {
@@ -39,7 +75,18 @@ void setup()
   Serial.print("ESP Board MAC Address:  ");
   Serial.println(WiFi.macAddress());
   MacAddress = WiFi.macAddress();
+  
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting");
+  while(WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
 }
+
  
 void loop()
 {
@@ -88,19 +135,22 @@ if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
 }
 
 //Doorsturen van data naar de API
-
-
-
-//Start de Slaap modus
-delay(1000);
-Go_To_Sleep();
+delay(2000);
+postDataToServer(1,Ldr_Sensor_Waarde);
 
 
   //Debugging
-  Serial.println("Debugging");
-  Serial.println(Temperatuur_Sensor_Waarde);
-  Serial.println(Grondvochtigheid_Sensor_Waarde);
-  Serial.println(Ldr_Sensor_Waarde);
-  Serial.println("End Debugging"); 
-  delay(1000);
+//  Serial.println("Debugging");
+//  Serial.println(Temperatuur_Sensor_Waarde);
+//  Serial.println(Grondvochtigheid_Sensor_Waarde);
+//  Serial.println(Ldr_Sensor_Waarde);
+//  Serial.println("End Debugging"); 
+//  delay(1000);
+
+
+//Start de Slaap modus
+Go_To_Sleep();
+
+
+
 }
