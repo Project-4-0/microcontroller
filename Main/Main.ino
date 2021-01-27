@@ -16,9 +16,9 @@ int Grondvochtigeheid_Pin = 39;
 int Ldr_Pin = 34;
 
 //Max waardes Sensoren
-int Max_Temperatuur_Sensor = 4000;
-int Max_Grondvochtigheid_Sensor = 4000;
-int Max_Ldr_Sensor = 4000;
+int Max_Temperatuur_Sensor = 95;
+int Max_Grondvochtigheid_Sensor = 95;
+int Max_Ldr_Sensor = 95;
 
 
 //Functie voor de slaap te activeren
@@ -69,9 +69,10 @@ void loop()
   }
 
 //Na opstart connectie met de API
-Ldr_Sensor_Waarde = analogRead(Ldr_Pin);
-Grondvochtigheid_Sensor_Waarde = analogRead(Grondvochtigeheid_Pin);
-Temperatuur_Sensor_Waarde = analogRead(Temperatuur_Pin);
+Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
+Grondvochtigheid_Sensor_Waarde = (analogRead(Grondvochtigeheid_Pin)/4095.0)*100;
+Temperatuur_Sensor_Waarde = (analogRead(Temperatuur_Pin)/4095.0)*100;
+
 
 //Foute waarde gemeten (ERROR)
 if(Ldr_Sensor_Waarde > Max_Ldr_Sensor){

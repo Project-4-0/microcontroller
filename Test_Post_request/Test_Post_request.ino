@@ -26,7 +26,7 @@ void postDataToServer() {
     //
     doc["BoxID"] = "1";
     doc["SensorID"] = 1;
-    doc["Value"] = 1;
+    doc["Value"] = 666;
    
 
      
