@@ -137,7 +137,7 @@ if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
 //Doorsturen van data naar de API
 delay(2000);
 postDataToServer(1,Ldr_Sensor_Waarde);
-
+delay(2000);
 
   //Debugging
 //  Serial.println("Debugging");
