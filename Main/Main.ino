@@ -10,7 +10,9 @@ const char* ssid = "Van Pelt Homehotspot";
 const char* password = "Speedy2169";
 
 //Your Domain name with URL path or IP address with path
-const char* serverName = "https://vito-api-dev.herokuapp.com/measurements";
+const char* serverNameMeasurements = "https://vito-api-dev.herokuapp.com/measurements";
+const char* serverName = "https://vito-youri-api.herokuapp.com/test";
+
 
 //Variabels
 String MacAddress;
@@ -18,6 +20,8 @@ int Variable_Box_Id = 0;
 int Temperatuur_Sensor_Waarde = 0;
 int Grondvochtigheid_Sensor_Waarde = 0;
 int Ldr_Sensor_Waarde = 0;
+
+int Sensor_Id_LDR = 1;
 
 //PinOut
 int Temperatuur_Pin = 36;
@@ -41,18 +45,18 @@ void Go_To_Sleep(){
 }
 
 //Functie voor data naar API te sturen
-int postDataToServer(int x,int y) {
+int postDataToServer(int x,int y, int z) {
   Serial.println("Posting JSON data to server...");
   // Block until we are able to connect to the WiFi access point
   if (WiFi.status()== WL_CONNECTED) {
     HTTPClient http;   
-    http.begin(serverName);  
+    http.begin(serverNameMeasurements);  
     http.addHeader("Content-Type", "application/json");         
     StaticJsonDocument<200> doc;
     // Add values in the document
-    doc["BoxID"] = "1";
-    doc["SensorID"] = x;
-    doc["Value"] = y;
+    doc["BoxID"] = x;
+    doc["SensorID"] = y;
+    doc["Value"] = z;
 
     String requestBody;
     serializeJson(doc, requestBody);
@@ -68,8 +72,28 @@ int postDataToServer(int x,int y) {
   }
 }
 
-void setup()
-{
+void getDataFromServer(){
+  Serial.println("Getting JSON data from server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(serverName);  
+     int httpCode = http.GET();        //Make the request
+ 
+    if (httpCode > 0) { //Check for the returning code
+ 
+        String payload = http.getString();
+        Serial.println(httpCode);
+        Serial.println(payload);
+      }
+ 
+    else {
+      Serial.println("Error on HTTP request");
+    }
+}
+}
+
+void setup(){
   Serial.begin(115200); // starts the serial port at 9600
   delay(100);
   Serial.print("ESP Board MAC Address:  ");
@@ -93,7 +117,7 @@ void loop()
   //Eerste Keer Startup
   if(Variable_Box_Id == 0){
     //Request Variable_Box_Id API
-    Variable_Box_Id = 15; 
+    Variable_Box_Id = 1; 
     Serial.println("Nieuwe Variable_Box_Id toegekend");  
     
     //Testen Meting Sensoren
@@ -136,7 +160,10 @@ if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
 
 //Doorsturen van data naar de API
 delay(2000);
-postDataToServer(1,Ldr_Sensor_Waarde);
+postDataToServer(Variable_Box_Id,Sensor_Id_LDR,Ldr_Sensor_Waarde);
+//postDataToServer(Variable_Box_Id,2,Grondvochtigheid_Sensor_Waarde);
+
+//getDataFromServer();
 delay(2000);
 
   //Debugging
