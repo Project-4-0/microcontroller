@@ -94,6 +94,14 @@ void getDataFromServer(){
 }
 }
 
+void readLdrSensor(){
+  Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
+}
+
+void readGrondvochtigheidSensor(){
+  Grondvochtigheid_Sensor_Waarde = (analogRead(Grondvochtigeheid_Pin)/4095.0)*100;
+}
+
 void setup(){
   Serial.begin(115200); // starts the serial port at 9600
   delay(100);
@@ -141,8 +149,8 @@ void loop()
   }
 
 //Na opstart connectie met de API
-Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
-Grondvochtigheid_Sensor_Waarde = (analogRead(Grondvochtigeheid_Pin)/4095.0)*100;
+readLdrSensor();
+readGrondvochtigheidSensor();
 Temperatuur_Sensor_Waarde = (analogRead(Temperatuur_Pin)/4095.0)*100;
 
 
