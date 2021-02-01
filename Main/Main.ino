@@ -24,6 +24,9 @@ int Ldr_Sensor_Waarde = 0;
 int Sensor_Id_LDR = 1;
 int Sensor_Id_Grondvochtigheid = 2;
 
+//Array's
+int arrayLdr [] = {};
+
 //PinOut
 int Temperatuur_Pin = 36;
 int Grondvochtigeheid_Pin = 39;
@@ -95,7 +98,13 @@ void getDataFromServer(){
 }
 
 void readLdrSensor(){
-  Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
+    for(int i = 0; i < 6; i++)
+      {
+        Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
+        arrayLdr[i] = Ldr_Sensor_Waarde;
+        delay(1000);
+        
+      }
 }
 
 void readGrondvochtigheidSensor(){
@@ -169,8 +178,8 @@ if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
 
 //Doorsturen van data naar de API
 //delay(2000);
-postDataToServer(Variable_Box_Id,Sensor_Id_LDR,Ldr_Sensor_Waarde);
-postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,Grondvochtigheid_Sensor_Waarde);
+//postDataToServer(Variable_Box_Id,Sensor_Id_LDR,Ldr_Sensor_Waarde);
+//postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,Grondvochtigheid_Sensor_Waarde);
 
 //getDataFromServer();
 delay(2000);
