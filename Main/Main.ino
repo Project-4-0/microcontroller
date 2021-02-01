@@ -3,7 +3,7 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-#define TIME_TO_SLEEP 5         // tijd in seconden dat de sleep modus actief is
+#define TIME_TO_SLEEP 1         // tijd in seconden dat de sleep modus actief is
 
 //Wifi credentials
 const char* ssid = "Van Pelt Homehotspot";
@@ -22,6 +22,7 @@ int Grondvochtigheid_Sensor_Waarde = 0;
 int Ldr_Sensor_Waarde = 0;
 
 int Sensor_Id_LDR = 1;
+int Sensor_Id_Grondvochtigheid = 2;
 
 //PinOut
 int Temperatuur_Pin = 36;
@@ -159,9 +160,9 @@ if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
 }
 
 //Doorsturen van data naar de API
-delay(2000);
+//delay(2000);
 postDataToServer(Variable_Box_Id,Sensor_Id_LDR,Ldr_Sensor_Waarde);
-//postDataToServer(Variable_Box_Id,2,Grondvochtigheid_Sensor_Waarde);
+postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,Grondvochtigheid_Sensor_Waarde);
 
 //getDataFromServer();
 delay(2000);
@@ -176,7 +177,7 @@ delay(2000);
 
 
 //Start de Slaap modus
-Go_To_Sleep();
+//Go_To_Sleep();
 
 
 
