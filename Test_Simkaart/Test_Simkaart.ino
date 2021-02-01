@@ -24,6 +24,9 @@ const char simPIN[]   = "1111";
 #define TINY_GSM_MODEM_SIM800      // Modem is SIM800
 #define TINY_GSM_RX_BUFFER   1024  // Set RX buffer to 1Kb
 
+// Define the serial console for debug prints, if needed
+#define DUMP_AT_COMMANDS
+
 #include <Wire.h>
 #include <TinyGsmClient.h>
 #include <ESP32Ping.h>
@@ -84,7 +87,7 @@ void loop() {
   }
   else {
     SerialMon.println(" OK"); 
-    bool success = Ping.ping("www.google.com", 3);
+    bool success = Ping.ping("www.bing.com", 3);
 
     if(!success){
       Serial.println("Ping failed");
