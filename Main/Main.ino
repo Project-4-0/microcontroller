@@ -13,11 +13,11 @@ const char* password = "Speedy2169";
 
 //Your Domain name with URL path or IP address with path
 const char* serverNameMeasurements = "https://vito-api-dev.herokuapp.com/measurements";
-const char* serverName = "https://vito-youri-api.herokuapp.com/test";
+const char* serverNamemacAddress = "https://vito-youri-api.herokuapp.com/boxes/macAddress";
 
 //Variabels
 String MacAddress;
-int Variable_Box_Id = 0;
+String Variable_Box_Id;
 int Temperatuur_Sensor_Waarde = 0;
 
 int Sensor_Id_LDR = 1;
@@ -40,6 +40,9 @@ int mediaan_LDR_Waarde = 0;
 int mediaan_Grondvochtigheid_Waarde = 0;
 
 
+//response server
+String responseMacAddress;
+
 //Functie voor de slaap te activeren
 void Go_To_Sleep(){
   Serial.println("Going to sleep");
@@ -51,7 +54,7 @@ void Go_To_Sleep(){
 }
 
 //Functie voor data naar API te sturen
-int postDataToServer(int x,int y, int z) {
+int postDataToServerMeasurments(String x,int y, int z) {
   Serial.println("Posting JSON data to server...");
   // Block until we are able to connect to the WiFi access point
   if (WiFi.status()== WL_CONNECTED) {
@@ -78,12 +81,40 @@ int postDataToServer(int x,int y, int z) {
   }
 }
 
+String postDataToServerMacAddress() {
+  Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(serverNamemacAddress);  
+    http.addHeader("Content-Type", "application/json");         
+    StaticJsonDocument<200> doc;
+    // Add values in the document
+    doc["MacAddress"] = MacAddress;
+
+
+    String requestBody;
+    serializeJson(doc, requestBody);
+    int httpResponseCode = http.POST(requestBody);
+    if(httpResponseCode>0){
+      String response = http.getString();                       
+      //Serial.println(httpResponseCode);   
+      //Serial.println(response);
+      responseMacAddress = response.substring(9,10);
+    }
+    else {
+      Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
+    }
+  }
+  
+}
+
 void getDataFromServer(){
   Serial.println("Getting JSON data from server...");
   // Block until we are able to connect to the WiFi access point
   if (WiFi.status()== WL_CONNECTED) {
     HTTPClient http;   
-    http.begin(serverName);  
+    http.begin(serverNamemacAddress);  
      int httpCode = http.GET();        //Make the request
  
     if (httpCode > 0) { //Check for the returning code
@@ -153,42 +184,44 @@ void setup(){
 void loop()
 {
   //Eerste Keer Startup
-  if(Variable_Box_Id == 0){
+  if(Variable_Box_Id == ""){
     //Request Variable_Box_Id API
-    Variable_Box_Id = 1; 
-    Serial.println("Nieuwe Variable_Box_Id toegekend");  
+    postDataToServerMacAddress();
+    Variable_Box_Id = responseMacAddress; 
+    Serial.println("Nieuwe Variable_Box_Id toegekend"); 
+    //Serial.println(Variable_Box_Id);
   }
 
-//Na opstart connectie met de API
-for(int i=0; i<4; i++){
-mediaan_LDR();
-}
-for(int i=0; i<4; i++){
-mediaan_Grondvochtigheid();
-}
-
-Temperatuur_Sensor_Waarde = (analogRead(Temperatuur_Pin)/4095.0)*100;
-
-
-//Doorsturen van data naar de API
-//delay(2000);
-postDataToServer(Variable_Box_Id,Sensor_Id_LDR,mediaan_LDR_Waarde);
-postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,mediaan_Grondvochtigheid_Waarde);
-
-//getDataFromServer();
-delay(2000);
-
-  //Debugging
-//  Serial.println("Debugging");
-//  Serial.println(Temperatuur_Sensor_Waarde);
-//  Serial.println(Grondvochtigheid_Sensor_Waarde);
-//  Serial.println(Ldr_Sensor_Waarde);
-//  Serial.println("End Debugging"); 
-//  delay(1000);
-
-
-//Start de Slaap modus
-//Go_To_Sleep();
+  //Na opstart connectie met de API
+  for(int i=0; i<4; i++){
+  mediaan_LDR();
+  }
+  for(int i=0; i<4; i++){
+  mediaan_Grondvochtigheid();
+  }
+  
+  Temperatuur_Sensor_Waarde = (analogRead(Temperatuur_Pin)/4095.0)*100;
+  
+  
+  //Doorsturen van data naar de API
+  //delay(2000);
+  postDataToServerMeasurments(Variable_Box_Id,Sensor_Id_LDR,mediaan_LDR_Waarde);
+  postDataToServerMeasurments(Variable_Box_Id,Sensor_Id_Grondvochtigheid,mediaan_Grondvochtigheid_Waarde);
+  
+  //getDataFromServer();
+  delay(2000);
+  
+    //Debugging
+  //  Serial.println("Debugging");
+  //  Serial.println(Temperatuur_Sensor_Waarde);
+  //  Serial.println(Grondvochtigheid_Sensor_Waarde);
+  //  Serial.println(Ldr_Sensor_Waarde);
+  //  Serial.println("End Debugging"); 
+  //  delay(1000);
+  
+  
+  //Start de Slaap modus
+  //Go_To_Sleep();
 
 
 
