@@ -2,6 +2,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include "RunningMedian.h"
+
 
 #define TIME_TO_SLEEP 1         // tijd in seconden dat de sleep modus actief is
 
@@ -13,13 +15,10 @@ const char* password = "Speedy2169";
 const char* serverNameMeasurements = "https://vito-api-dev.herokuapp.com/measurements";
 const char* serverName = "https://vito-youri-api.herokuapp.com/test";
 
-
 //Variabels
 String MacAddress;
 int Variable_Box_Id = 0;
 int Temperatuur_Sensor_Waarde = 0;
-int Grondvochtigheid_Sensor_Waarde = 0;
-int Ldr_Sensor_Waarde = 0;
 
 int Sensor_Id_LDR = 1;
 int Sensor_Id_Grondvochtigheid = 2;
@@ -29,10 +28,16 @@ int Temperatuur_Pin = 36;
 int Grondvochtigeheid_Pin = 39;
 int Ldr_Pin = 34;
 
-//Max waardes Sensoren
-int Max_Temperatuur_Sensor = 95;
-int Max_Grondvochtigheid_Sensor = 95;
-int Max_Ldr_Sensor = 95;
+
+//initialisatie mediaan
+RunningMedian samples_LDR = RunningMedian(5);
+RunningMedian samples_Grondvochtigheid = RunningMedian(5);
+
+long count_LDR = 0;
+long count_Grondvochtigheid = 0;
+
+int mediaan_LDR_Waarde = 0;
+int mediaan_Grondvochtigheid_Waarde = 0;
 
 
 //Functie voor de slaap te activeren
@@ -94,12 +99,36 @@ void getDataFromServer(){
 }
 }
 
-void readLdrSensor(){
-  Ldr_Sensor_Waarde = (analogRead(Ldr_Pin)/4095.0)*100;
+
+//functie voor mediaan te bereken
+void mediaan_LDR()
+{
+  if (count_LDR == 5){ 
+    count_LDR = 0;
+    mediaan_LDR_Waarde = samples_LDR.getMedian();
+    samples_LDR.clear();
+    }; 
+  count_LDR++;
+
+  long x = (analogRead(Ldr_Pin)/4095.0)*100;
+
+  samples_LDR.add(x);
+
 }
 
-void readGrondvochtigheidSensor(){
-  Grondvochtigheid_Sensor_Waarde = (analogRead(Grondvochtigeheid_Pin)/4095.0)*100;
+void mediaan_Grondvochtigheid()
+{
+  if (count_Grondvochtigheid == 5){ 
+    count_Grondvochtigheid = 0;
+    mediaan_Grondvochtigheid_Waarde = samples_Grondvochtigheid.getMedian();
+    samples_Grondvochtigheid.clear();
+    }; 
+  count_Grondvochtigheid++;
+
+  long x = (analogRead(Grondvochtigeheid_Pin)/4095.0)*100;
+
+  samples_Grondvochtigheid.add(x);
+
 }
 
 void setup(){
@@ -128,49 +157,23 @@ void loop()
     //Request Variable_Box_Id API
     Variable_Box_Id = 1; 
     Serial.println("Nieuwe Variable_Box_Id toegekend");  
-    
-    //Testen Meting Sensoren
-    Ldr_Sensor_Waarde = analogRead(Ldr_Pin);
-    Grondvochtigheid_Sensor_Waarde = analogRead(Grondvochtigeheid_Pin);
-    Temperatuur_Sensor_Waarde = analogRead(Temperatuur_Pin);
-    
-    // Als sensor defect is(ERROR)
-    if(Ldr_Sensor_Waarde == 0){
-      Serial.println("Error Ldr_Sensor Kapot"); 
-    }
-    
-    if(Temperatuur_Sensor_Waarde == 0){
-      Serial.println("Error Temperatuur_Sensor Kapot"); 
-    }
-    
-    if(Grondvochtigheid_Sensor_Waarde == 0){
-      Serial.println("Error Grondvochtigheid_Sensor Kapot"); 
-    }
   }
 
 //Na opstart connectie met de API
-readLdrSensor();
-readGrondvochtigheidSensor();
+for(int i=0; i<4; i++){
+mediaan_LDR();
+}
+for(int i=0; i<4; i++){
+mediaan_Grondvochtigheid();
+}
+
 Temperatuur_Sensor_Waarde = (analogRead(Temperatuur_Pin)/4095.0)*100;
 
 
-//Foute waarde gemeten (ERROR)
-if(Ldr_Sensor_Waarde > Max_Ldr_Sensor){
-  Serial.println("Error Ldr_Sensor Foute waarde"); 
-}
-
-if(Temperatuur_Sensor_Waarde > Max_Temperatuur_Sensor){
-  Serial.println("Error Temperatuur_Sensor Foute waarde"); 
-}
-
-if(Grondvochtigheid_Sensor_Waarde > Max_Grondvochtigheid_Sensor){
-  Serial.println("Error Grondvochtigheid_Sensor Foute waarde"); 
-}
-
 //Doorsturen van data naar de API
 //delay(2000);
-postDataToServer(Variable_Box_Id,Sensor_Id_LDR,Ldr_Sensor_Waarde);
-postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,Grondvochtigheid_Sensor_Waarde);
+postDataToServer(Variable_Box_Id,Sensor_Id_LDR,mediaan_LDR_Waarde);
+postDataToServer(Variable_Box_Id,Sensor_Id_Grondvochtigheid,mediaan_Grondvochtigheid_Waarde);
 
 //getDataFromServer();
 delay(2000);
