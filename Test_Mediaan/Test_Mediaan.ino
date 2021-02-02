@@ -17,12 +17,12 @@ void setup()
 
 void loop()
 {
-  test1();
+  mediaan_LDR();
   delay(1000);
   Serial.println(mediaanLDR);
 }
 
-void test1()
+void mediaan_LDR()
 {
   if (count == 5){ 
     Serial.println(F("\nmsec \tAnR \tSize \tCnt \tLow \tAvg \tAvg(3) \tMed \tHigh"));
