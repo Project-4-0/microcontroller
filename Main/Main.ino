@@ -13,7 +13,8 @@ const char* password = "Speedy2169";
 
 //Your Domain name with URL path or IP address with path
 const char* serverNameMeasurements = "https://vito-api-dev.herokuapp.com/measurements";
-const char* serverNamemacAddress = "https://vito-youri-api.herokuapp.com/boxes/macAddress";
+const char* serverNamemacAddress = "https://vito-api-dev.herokuapp.com/boxes/macAddress";
+const char* serverNameAddSensorArduino = "https://vito-api-dev.herokuapp.com/boxes/add_sensor_arduino";
 
 //Variabels
 String MacAddress;
@@ -21,7 +22,10 @@ String Variable_Box_Id;
 int Temperatuur_Sensor_Waarde = 0;
 
 int Sensor_Id_LDR = 1;
-int Sensor_Id_Grondvochtigheid = 2;
+int Sensor_Id_Grondvochtigheid = 3;
+
+int sensorsdoorgestuurd =0;
+String hhtpResponseAddSensorArduino = "400";
 
 //PinOut
 int Temperatuur_Pin = 36;
@@ -42,6 +46,7 @@ int mediaan_Grondvochtigheid_Waarde = 0;
 
 //response server
 String responseMacAddress;
+String responseAddSensorArduino;
 
 //Functie voor de slaap te activeren
 void Go_To_Sleep(){
@@ -101,6 +106,37 @@ String postDataToServerMacAddress() {
       //Serial.println(httpResponseCode);   
       //Serial.println(response);
       responseMacAddress = response.substring(9,10);
+    }
+    else {
+      Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
+    }
+  }
+  
+}
+
+String postDataToServerAddSensorArduino(String x, String y, String z) {
+  Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(serverNameAddSensorArduino);  
+    http.addHeader("Content-Type", "application/json");         
+    StaticJsonDocument<200> doc;
+    // Add values in the document
+    doc["BoxID"] = x;
+    doc["SensorName"] = y;
+    doc["SensorType"] = z;
+
+    String requestBody;
+    serializeJson(doc, requestBody);
+    int httpResponseCode = http.POST(requestBody);
+    if(httpResponseCode>0){
+      String response = http.getString();                       
+      Serial.println(httpResponseCode);   
+      Serial.println(response);
+      responseAddSensorArduino = response.substring(12,14); //Substing waardes nog aanpassen !!!!!!!!!!!!!!!!!!!!!!
+      Serial.println(responseAddSensorArduino);
+      hhtpResponseAddSensorArduino = httpResponseCode;
     }
     else {
       Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
@@ -192,6 +228,13 @@ void loop()
     //Serial.println(Variable_Box_Id);
   }
 
+  if(sensorsdoorgestuurd == 0){
+  postDataToServerAddSensorArduino(Variable_Box_Id,"LDR","Licht");
+  postDataToServerAddSensorArduino(Variable_Box_Id,"Bodemvochtigheid","Vochtigheid");
+  if(hhtpResponseAddSensorArduino != "400"){
+    sensorsdoorgestuurd = 1;
+    }
+  }
   //Na opstart connectie met de API
   for(int i=0; i<4; i++){
   mediaan_LDR();
@@ -211,15 +254,7 @@ void loop()
   //getDataFromServer();
   delay(2000);
   
-    //Debugging
-  //  Serial.println("Debugging");
-  //  Serial.println(Temperatuur_Sensor_Waarde);
-  //  Serial.println(Grondvochtigheid_Sensor_Waarde);
-  //  Serial.println(Ldr_Sensor_Waarde);
-  //  Serial.println("End Debugging"); 
-  //  delay(1000);
-  
-  
+
   //Start de Slaap modus
   //Go_To_Sleep();
 
