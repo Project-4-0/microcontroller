@@ -87,7 +87,7 @@ void loop() {
   }
   else {
     SerialMon.println(" OK"); 
-    bool success = Ping.ping("www.bing.com", 3);
+    bool success = Ping.ping("www.google.com", 3);
 
     if(!success){
       Serial.println("Ping failed");
