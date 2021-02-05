@@ -21,8 +21,8 @@ String MacAddress;
 String Variable_Box_Id;
 int Temperatuur_Sensor_Waarde = 0;
 
-int Sensor_Id_LDR = 1;
-int Sensor_Id_Grondvochtigheid = 3;
+String Sensor_Id_LDR;
+String Sensor_Id_Grondvochtigheid;
 
 int sensorsdoorgestuurd =0;
 String hhtpResponseAddSensorArduino = "400";
@@ -59,7 +59,7 @@ void Go_To_Sleep(){
 }
 
 //Functie voor data naar API te sturen
-int postDataToServerMeasurments(String x,int y, int z) {
+int postDataToServerMeasurments(String x,String y, int z) {
   Serial.println("Posting JSON data to server...");
   // Block until we are able to connect to the WiFi access point
   if (WiFi.status()== WL_CONNECTED) {
@@ -114,7 +114,7 @@ String postDataToServerMacAddress() {
   
 }
 
-String postDataToServerAddSensorArduino(String x, String y, String z) {
+String postDataToServerAddSensorArduinoLicht(String x, String y, String z) {
   Serial.println("Posting JSON data to server...");
   // Block until we are able to connect to the WiFi access point
   if (WiFi.status()== WL_CONNECTED) {
@@ -134,9 +134,42 @@ String postDataToServerAddSensorArduino(String x, String y, String z) {
       String response = http.getString();                       
       Serial.println(httpResponseCode);   
       Serial.println(response);
-      responseAddSensorArduino = response.substring(12,14); //Substing waardes nog aanpassen !!!!!!!!!!!!!!!!!!!!!!
-      Serial.println(responseAddSensorArduino);
-      hhtpResponseAddSensorArduino = httpResponseCode;
+      responseAddSensorArduino = response.substring(12,14);
+      //Serial.println(responseAddSensorArduino);
+      Sensor_Id_LDR = responseAddSensorArduino;
+
+    }
+    else {
+      Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
+    }
+  }
+  
+}
+
+String postDataToServerAddSensorArduinoBodemvochtigheid(String x, String y, String z) {
+  Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(serverNameAddSensorArduino);  
+    http.addHeader("Content-Type", "application/json");         
+    StaticJsonDocument<200> doc;
+    // Add values in the document
+    doc["BoxID"] = x;
+    doc["SensorName"] = y;
+    doc["SensorType"] = z;
+
+    String requestBody;
+    serializeJson(doc, requestBody);
+    int httpResponseCode = http.POST(requestBody);
+    if(httpResponseCode>0){
+      String response = http.getString();                       
+      Serial.println(httpResponseCode);   
+      Serial.println(response);
+      responseAddSensorArduino = response.substring(12,14);
+      //Serial.println(responseAddSensorArduino);
+      Sensor_Id_Grondvochtigheid = responseAddSensorArduino;
+
     }
     else {
       Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
@@ -228,12 +261,11 @@ void loop()
     //Serial.println(Variable_Box_Id);
   }
 
-  if(sensorsdoorgestuurd == 0){
-  postDataToServerAddSensorArduino(Variable_Box_Id,"LDR","Licht");
-  postDataToServerAddSensorArduino(Variable_Box_Id,"Bodemvochtigheid","Vochtigheid");
-  if(hhtpResponseAddSensorArduino != "400"){
-    sensorsdoorgestuurd = 1;
-    }
+  if(Sensor_Id_LDR == ""){
+  postDataToServerAddSensorArduinoLicht(Variable_Box_Id,"LDR","Licht");
+  }
+  if(Sensor_Id_Grondvochtigheid == ""){
+  postDataToServerAddSensorArduinoBodemvochtigheid(Variable_Box_Id,"Bodemvochtigheid_B_one","Bodemvochtigheid");
   }
   //Na opstart connectie met de API
   for(int i=0; i<4; i++){
