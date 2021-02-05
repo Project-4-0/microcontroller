@@ -15,6 +15,9 @@
 
 #include <TinyGsmClient.h>
 
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
 #include <Wire.h>
 #include <ArduinoHttpClient.h>
 
@@ -62,8 +65,8 @@ const char gprsUser[] = "web";
 const char gprsPass[] = "web";
 
 // Server details
-const char server[] = "vsh.pp.ua";
-const char resource[] = "/TinyGSM/logo.txt";
+const char server[] = "vito-api-dev.herokuapp.com";
+const char resource[] = "/boxes/1";
 const int  port = 80;
 
 int ReCnctFlag;  // Reconnection Flag
@@ -179,13 +182,13 @@ void HTTPClientHandle(void){
     delay(5000);
     return;
   }
-/* /// this is for informational reasons only not needed ///
+/// this is for informational reasons only not needed ///
   while (http.headerAvailable()) {
     String headerName = http.readHeaderName();
     String headerValue = http.readHeaderValue();
    //SerialMon.println(headerName + " : " + headerValue);
   }
-*/
+
   int length = http.contentLength();
   if (length >= 0) {
     SerialMon.print(F("Content length is: "));
@@ -213,9 +216,10 @@ void HTTPClientHandle(void){
 }
 
 
-void loop(){
 
+void loop(){
   Serial.println("text");
+HTTPClientHandle();
   delay(1000);
   
 }
