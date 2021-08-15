@@ -65,9 +65,10 @@ const char gprsUser[] = "web";
 const char gprsPass[] = "web";
 
 // Server details
-const char server[] = "vito-api-dev.herokuapp.com";
-const char resource[] = "/boxes/1";
+const char server[] = "http://vito-api-dev.herokuapp.com/measurements";
+const char resource[] = "/measurements";
 const int  port = 80;
+
 
 int ReCnctFlag;  // Reconnection Flag
 int ReCnctCount = 0;  // Reconnection counter
@@ -169,46 +170,35 @@ void HTTPClientHandle(void){
 }
 
   SerialMon.print(F("Performing HTTP GET request... "));
-  int err = http.get(resource);
-  if (err != 0) {
-    SerialMon.println(F("failed to connect"));
-    delay(5000);
-    return;
-  }
+Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+  if (WiFi.status()== WL_CONNECTED) {
+    HTTPClient http;   
+    http.begin(server);  
+    http.addHeader("Content-Type", "application/json");         
+    StaticJsonDocument<200> doc;
+    // Add values in the document
+    doc["BoxID"] = 1;
+    doc["SensorID"] = 1;
+    doc["Value"] = 11;
 
-  int status = http.responseStatusCode();
-  SerialMon.println(status);
-  if (!status) {
-    delay(5000);
-    return;
+    String requestBody;
+    serializeJson(doc, requestBody);
+    int httpResponseCode = http.POST(requestBody);
+    if(httpResponseCode>0){
+      String response = http.getString();                       
+      Serial.println(httpResponseCode);   
+      Serial.println(response);
+    }
+    else {
+      Serial.printf("Error occurred while sending HTTP POST: %s\n"); 
+    }
   }
-/// this is for informational reasons only not needed ///
-  while (http.headerAvailable()) {
-    String headerName = http.readHeaderName();
-    String headerValue = http.readHeaderValue();
-   //SerialMon.println(headerName + " : " + headerValue);
-  }
-
-  int length = http.contentLength();
-  if (length >= 0) {
-    SerialMon.print(F("Content length is: "));
-    SerialMon.println(length);
-  }
-  if (http.isResponseChunked()) {
-    SerialMon.println(F("The response is chunked"));
-  }
-
-  String body = http.responseBody();
-  SerialMon.println(F("Response:"));
-  SerialMon.println(body);
-
-  SerialMon.print(F("Body length is: "));
-  SerialMon.println(body.length());
 
   // Shutdown
 
-  http.stop();
-  SerialMon.println(F("Server disconnected"));
+//  http.stop();
+//  SerialMon.println(F("Server disconnected"));
 
   ///modem.gprsDisconnect(); /// leave GPRS connected ///
   ///SerialMon.println(F("GPRS disconnected"));
@@ -218,8 +208,7 @@ void HTTPClientHandle(void){
 
 
 void loop(){
-  Serial.println("text");
-HTTPClientHandle();
-  delay(1000);
+  HTTPClientHandle();
+  delay(60000);
   
 }
